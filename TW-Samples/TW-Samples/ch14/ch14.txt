@@ -1,0 +1,50 @@
+##14.1.3
+install.packages("foreign") #讀入dta格式資料前需先安裝foreign套件
+library(foreign)
+dat <- read.dta("http://www.ats.ucla.edu/stat/data/ologit.dta") #讀入dta格式資料
+head(dat)
+
+library(MASS)
+orm <- polr(apply ~ pared + public + gpa, data = dat, method="logistic") #logistic模型
+summary(orm)
+
+orm_p <- polr(apply ~ pared + public + gpa, data = dat, method="probit") #probit
+summary(orm_p)
+
+orm2 <- lrm(apply ~ pared + public + gpa, data = dat)
+orm2
+
+##14.2.3
+install.packages("mlogit")
+library(mlogit)
+data("Fishing", package = "mlogit")
+dim(Fishing)
+
+Fish <- mlogit.data(Fishing, varying = c(2:9), shape = "wide", choice = "mode")
+head(Fish)  #轉換後的資料前6行
+
+mlog_F=mlogit(mode ~ price + catch, data = Fish)
+summary(mlog_F)
+
+##14.3.3
+install.packages("AER")
+library(AER)
+data("TravelMode", package = "AER")
+dim(TravelMode)
+
+##
+TravelMode$avincome <- with(TravelMode, income * (mode == "air"))
+TravelMode$time <- with(TravelMode, travel + wait)/60
+TravelMode$timeair <- with(TravelMode, time * I(mode == "air"))
+TravelMode$income <- with(TravelMode, income / 10)
+TravelMode$incomeother <- with(TravelMode, ifelse(mode %in% c('air', 'car'),income, 0))
+head(TravelMode)
+
+##
+nl <- mlogit(choice~gcost+wait+incomeother, TravelMode,
+           shape='long', alt.var='mode',
+           nests=list(public=c('train', 'bus'), other=c('car','air')))
+summary(nl)
+
+
+

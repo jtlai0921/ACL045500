@@ -1,0 +1,214 @@
+##13.8
+grade=read.table(file="grade.txt",header=T)
+
+summarys=function(x){
+  list(mean=mean(x),max=max(x),min=min(x),sd=sd(x))
+}         #自編一個求基本描述統計量的簡單函數 
+
+summarys(subset(grade,PSI==0)$GRADE)  #subset()篩選PSI=0的資料
+summarys(subset(grade,PSI==1)$GRADE)
+summarys(grade$GRADE)
+summarys(subset(grade,PSI==0)$GPA)
+summarys(subset(grade,PSI==1)$GPA)
+summarys(grade$GPA)
+summarys(subset(grade,PSI==0)$TUCE)
+summarys(subset(grade,PSI==1)$TUCE)
+summarys(grade$TUCE)
+summarys(subset(grade,PSI==0)$PSI)
+summarys(subset(grade,PSI==1)$PSI)
+summarys(grade$PSI)
+
+##
+summary(lpm)
+
+##
+grade=read.table(file="grade.txt",header=T)
+
+grade.probit=glm(GRADE~GPA+TUCE+PSI,family=binomial
+   (link="probit"),data=grade)     ###probit模型
+
+summary(grade.probit)
+
+##
+install.packages("lmtest")
+library(lmtest)    #需首先安裝lmtest套件，並載入套件
+lrtest(grade.probit)
+
+##
+McFa.Rsquare=function(glm.object){ #glm()函數的估計結果作為函數的輸入變數
+  deviance=glm.object$deviance               
+  null.deviance=glm.object$null.deviance
+  McFa.Rsquare=1-(deviance/null.deviance)
+  list(McFadden.Rsquare=McFa.Rsquare)
+}
+McFa.Rsquare(grade.probit)
+
+##
+grade.logit=glm(GRADE~GPA+TUCE+PSI,family=binomial
+  (link="logit"),data=grade)   #注意link設為logit
+
+summary(grade.logit)
+
+##
+library(lmtest)
+lrtest(grade.logit)         ####LR檢定
+McFa.Rsquare(grade.logit)
+
+##
+coe=coef(grade.probit)	#提取Probit模型係數
+
+probit=dnorm(coe[1]+coe[2]*mean(grade$GPA)+coe[3]*mean(grade$TUCE)+
+  coe[4]*mean(grade$PSI))	#求probit模型平均邊際影響
+
+(m.gpa=coe[2]*probit)	#求GPA平均邊際影響
+(m.tuce=coe[3]*probit)
+(m.PSI=coe[4]*probit)
+coe.l=coef(grade.logit)	#提取Logit模型係數
+
+logit=dlogis(coe.l[1]+coe.l[2]*mean(grade$GPA)+coe.l[3]*
+  mean (grade$TUCE)+coe.l[4]*mean(grade$PSI))    #求Logit模型平均邊際影響
+
+(m.gpa.l=coe.l[2]*logit)
+(m.tuce.l=coe.l[3]*logit)
+(m.PSI.l=coe.l[4]*logit)
+
+##13.9
+sample16000<-read.csv("sample16000.csv",header=T) #讀取16000個隨機樣本
+attach(sample16000)
+par(mfrow=c(2,2))
+barplot(prop.table(table(default,sex),2)[2,],names.arg=c("女","男"), 
+main="性別vs違約行為")
+
+barplot(prop.table(table(default,education),2)[2,],names.arg=c("小學及以下",
+  "初中","高中/職高","專科","本科及以上"),main="學歷vs違約行為")
+
+barplot(prop.table(table(default,familys),2)[2,],names.arg=c("<20000", 
+  "20001~30000","30001~40000","40001~50000","50001~60000",">60000"),
+  main="家庭月收入(台幣)vs違約行為")
+
+barplot(prop.table(table(default,frequency),2)[2,],names.arg=c("天天用", 
+  "經常用","偶爾用","很少用"),main="使用頻率vs違約行為")
+
+
+##13.9.2
+###### 將voction簡化歸類為11個大類
+for(i in 1:16000){
+if(vocation[i]>1&vocation[i]<8){vocation[i]=1}
+if(vocation[i]==8|vocation[i]==11){vocation[i]=2}
+if(vocation[i]==9|vocation[i]==10){vocation[i]=3}
+if(vocation[i]==12){vocation[i]=4}
+if(vocation[i]==13|vocation[i]==14){vocation[i]=5}
+if(vocation[i]==15){vocation[i]=6}
+if(vocation[i]==16){vocation[i]=7}
+if(vocation[i]==17){vocation[i]=8}
+if(vocation[i]==18){vocation[i]=9}
+if(vocation[i]==19|vocation[i]==20){vocation[i]=10}
+if(vocation[i]==20|vocation[i]==21){vocation[i]=11}
+}
+vocation<-as.factor(vocation)
+###### 將city分為二變數
+for(i in 1:16000){
+if(city[i]==2){city[i]=1}
+if(city[i]==3){city[i]=0}
+}
+city<-as.factor(city)
+###### 將不同變數轉化為相應的資料類型
+resource<-as.factor(sample16000$resource)
+default<-as.factor(sample16000$default)
+X30days<-as.factor(sample16000$X30days)
+baddebt<-as.factor(sample16000$baddebt)
+loan800<-as.factor(sample16000$loan800)
+tuipiao<-as.factor(sample16000$tuipiao)
+juzhu<-as.factor(sample16000$juzhu)
+tingka<-as.factor(sample16000$tingka)
+number<-sample16000$number
+frequency<-sample16000$frequency
+location<-as.factor(sample16000$location)
+sex<-as.factor(sample16000$sex)
+age<-sample16000$age
+marriage<-sample16000$marriage
+education<-sample16000$education
+salary<-sample16000$salary
+expense<-sample16000$expense
+housing<-as.factor(sample16000$housing)
+familys<-sample16000$familys
+payment<-sample16000$payment
+religion<-as.factor(sample16000$religion)
+population<-sample16000$population
+economy<-sample16000$economy
+blood<-as.factor(sample16000$blood)
+constellation<-as.factor(sample16000$constellation)
+agec<-sample16000$agec
+
+###### 逐步迴歸 ######
+default.logit<-glm(default~X30days+baddebt+loan800+number+frequency+city+
+  sex+age+marriage+education+vocation+salary+expense+familys+payment+
+  population+economy,family=binomial(link="logit"))
+summary(default.logit)
+library(MASS)
+step(default.logit,direction="backward")
+
+###### 經逐步迴歸選擇的最優模型 ######
+default.logit1<-glm( default  ~  X30days + baddebt + loan800 + number +
+  frequency + city + sex + marriage + education + vocation +
+  salary + expense + familys + payment + population,family=binomial())
+summary(default.logit1)
+
+###### LR檢定 ######
+library(lmtest)
+lrtest(default.logit1)
+###### macfadden R2 ######
+McFa.Rsquare=function(default.logit1){ #glm()估計結果作為函數的輸入變數
+  deviance=default.logit1$deviance
+  null.deviance=default.logit1$null.deviance
+  McFa.Rsquare=1-(deviance/null.deviance)
+  list(McFadden.Rsquare=McFa.Rsquare)
+}
+McFa.Rsquare(default.logit1)
+
+##13.9.3
+###### 邊際分析 ######
+testdata_mar<-data.frame(X30days=0, baddebt=0, loan800=0, number=2,
+  frequency=3, city=1, sex=1, marriage=c(1:3), education=3,vocation=1,
+  salary=1, expense=1,familys=2, payment=4, population=4) 
+
+##13.9.4
+###### 樣本擬合 ######
+i=12001:16000   #改為i=1:12000 則可對無瑕疵用戶進行擬合
+testdata<-data.frame(X30days=X30days[i], baddebt=baddebt[i], 
+  loan800= loan800[i],
+  number =number[i],frequency =frequency[i], city=city[i],
+  sex=sex[i], marriage=marriage[i],
+  education =education[i],vocation=vocation[i],
+  salary=salary[i], expense=expense[i],familys =familys[i],
+  payment =payment[i],population=population[i])
+  testdata$prob<-predict(default.logit1,newdata=testdata,type=”response”)
+length(testdata$prob[testdata$prob>0.5])
+
+##事後預測
+test<-read.csv("test.csv",header=T)
+attach(test)
+i=1:1000
+testdata_shihou<-data.frame(X30days=X30days_test[i] ,baddebt=
+  baddebt_test[i], loan800 =loan800_test[i], number=number_test[i],
+  frequency= frequency_test[i],city=city_test[i],sex=sex_test[i],
+  marriage= marriage_test[i], education=education_test[i],vocation=
+  vocation_test[i], salary=salary_test[i],expense=expense_test[i],familys=
+  familys_test[i], payment=payment_test[i],population=population_test[i])
+testdata_shihou$prob<-predict(default.logit1,newdata=
+  testdata_shihou,type=”response”)
+###### 以0.5為判斷標準，大於0.5記為有瑕疵
+s<-0
+m=0
+xulie<-NULL
+jilu<-NULL
+for(k in 1:1000){
+  if(testdata_shihou$prob[k]>0.5){a<-1}
+  else{a<-0}
+  if(a==default_test[k]){s<-s+1}
+  else{m=m+1
+  xulie[m]<-k
+}
+xulie #記錄判斷錯誤的樣本序號
+s #記錄1000個事後預測正確的數目
+

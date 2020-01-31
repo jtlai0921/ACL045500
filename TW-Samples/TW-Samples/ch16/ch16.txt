@@ -1,0 +1,45 @@
+##16.1
+install.packages("quantreg")
+library(quantreg)
+data(engel)
+attach(engel)
+hist(foodexp)
+plot(density(foodexp),add=T)
+plot(income,foodexp,xlab="Household Income",ylab="Food Expenditure", type ="n", cex=.5)
+points(income,foodexp,cex=.5,col="blue")
+
+##16.3
+quantile(x,  probs = c(0.1,0.25,0.5,0.75),type=2)
+
+##16.4
+q_0.5=rq(foodexp ~ income,tau=0.5,data=engel)
+summary(q_0.5)
+
+lmf<-lm(foodexp ~ income,data=engel)
+summary(lmf)
+
+##
+taus <- c(.05,.1,.25,.75,.9,.95)
+xx <- seq(min(income),max(income),100)
+rqss=rq((foodexp)~(income),tau=taus)
+summary(rqss)
+
+##
+f <- coef(rqss)  #提取分位數迴歸係數
+yy <- cbind(1,xx)%*%f  #計算分位數迴歸擬合值
+plot(income,foodexp,xlab="Household Income",ylab="Food Expenditure", 
+     type = "n", cex=.5)
+points(income,foodexp,cex=.5,col="blue")
+for(i in 1:length(taus)){
+   lines(xx,yy[,i],col = "gray")
+}
+abline(lm(foodexp ~ income),col="red",lty = 2)
+abline(rq(foodexp ~ income), col="blue")
+legend(2500,500,c("mean (LSE) fit", "median (LAE) fit"),
+      col = c("red","blue"),lty = c(2,1))
+
+##
+plot(summary(rq(foodexp~income, tau = 1:49/50,data=engel)))
+
+
+
